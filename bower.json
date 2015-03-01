@@ -1,0 +1,9 @@
+{
+  "name": "js-md4",
+  "version": "0.1.0",
+  "main": ["build/md4.min.js"],
+  "ignore": [
+    "samples",
+    "tests"
+  ]
+}
