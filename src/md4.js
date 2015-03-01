@@ -1,5 +1,5 @@
 /*
- * js-md4 v0.1.0
+ * js-md4 v0.1.1
  * https://github.com/emn178/js-md4
  *
  * Copyright 2015, emn178@gmail.com
@@ -31,13 +31,9 @@
   }
 
   var md4 = function(message) {
-    var h0, h1, h2, h3, a, b, c, d, code, end = false,
+    var h0, h1, h2, h3, a, b, c, d, ab, bc, cd, da, code, first = true, end = false,
         index = 0, i, start = 0, bytes = 0, length = message.length;
 
-    h0 = 0x67452301;
-    h1 = 0xefcdab89;
-    h2 = 0x98badcfe;
-    h3 = 0x10325476;
     blocks[16] = 0;
     do {
       blocks[0] = blocks[16];
@@ -97,66 +93,155 @@
         end = true;
       }
 
-      a = h0;
-      b = h1;
-      c = h2;
-      d = h3;
+      if(first) {
+        a = blocks[0] - 1;
+        a = (a << 3) | (a >>> 29);
+        d = ((a & 0xefcdab89) | (~a & 0x98badcfe)) + blocks[1] + 271733878;
+        d = (d << 7) | (d >>> 25);
+        c = ((d & a) | (~d & 0xefcdab89)) + blocks[2] - 1732584194;
+        c = (c << 11) | (c >>> 21);
+        b = ((c & d) | (~c & a)) + blocks[3] - 271733879;
+        b = (b << 19) | (b >>> 13);
+      } else {
+        a = h0;
+        b = h1;
+        c = h2;
+        d = h3;
+        a += ((b & c) | (~b & d)) + blocks[0];
+        a = (a << 3) | (a >>> 29);
+        d += ((a & b) | (~a & c)) + blocks[1];
+        d = (d << 7) | (d >>> 25);
+        c += ((d & a) | (~d & b)) + blocks[2];
+        c = (c << 11) | (c >>> 21);
+        b += ((c & d) | (~c & a)) + blocks[3];
+        b = (b << 19) | (b >>> 13);
+      }
+      a += ((b & c) | (~b & d)) + blocks[4];
+      a = (a << 3) | (a >>> 29);
+      d += ((a & b) | (~a & c)) + blocks[5];
+      d = (d << 7) | (d >>> 25);
+      c += ((d & a) | (~d & b)) + blocks[6];
+      c = (c << 11) | (c >>> 21);
+      b += ((c & d) | (~c & a)) + blocks[7];
+      b = (b << 19) | (b >>> 13);
+      a += ((b & c) | (~b & d)) + blocks[8];
+      a = (a << 3) | (a >>> 29);
+      d += ((a & b) | (~a & c)) + blocks[9];
+      d = (d << 7) | (d >>> 25);
+      c += ((d & a) | (~d & b)) + blocks[10];
+      c = (c << 11) | (c >>> 21);
+      b += ((c & d) | (~c & a)) + blocks[11];
+      b = (b << 19) | (b >>> 13);
+      a += ((b & c) | (~b & d)) + blocks[12];
+      a = (a << 3) | (a >>> 29);
+      d += ((a & b) | (~a & c)) + blocks[13];
+      d = (d << 7) | (d >>> 25);
+      c += ((d & a) | (~d & b)) + blocks[14];
+      c = (c << 11) | (c >>> 21);
+      b += ((c & d) | (~c & a)) + blocks[15];
+      b = (b << 19) | (b >>> 13);
 
-      a = r1(a, b, c, d, blocks[0], 3);
-      d = r1(d, a, b, c, blocks[1], 7);
-      c = r1(c, d, a, b, blocks[2], 11);
-      b = r1(b, c, d, a, blocks[3], 19);
-      a = r1(a, b, c, d, blocks[4], 3);
-      d = r1(d, a, b, c, blocks[5], 7);
-      c = r1(c, d, a, b, blocks[6], 11);
-      b = r1(b, c, d, a, blocks[7], 19);
-      a = r1(a, b, c, d, blocks[8], 3);
-      d = r1(d, a, b, c, blocks[9], 7);
-      c = r1(c, d, a, b, blocks[10], 11);
-      b = r1(b, c, d, a, blocks[11], 19);
-      a = r1(a, b, c, d, blocks[12], 3);
-      d = r1(d, a, b, c, blocks[13], 7);
-      c = r1(c, d, a, b, blocks[14], 11);
-      b = r1(b, c, d, a, blocks[15], 19);
+      bc = b & c;
+      a += (bc | (b & d) | (c & d)) + blocks[0] + 1518500249;
+      a = (a << 3) | (a >>> 29);
+      ab = a & b;
+      d += (ab | (a & c) | bc) + blocks[4] + 1518500249;
+      d = (d << 5) | (d >>> 27);
+      da = d & a;
+      c += (da | (d & b) | ab) + blocks[8] + 1518500249;
+      c = (c << 9) | (c >>> 23);
+      cd = c & d;
+      b += (cd | (c & a) | da) + blocks[12] + 1518500249;
+      b = (b << 13) | (b >>> 19);
+      bc = b & c;
+      a += (bc | (b & d) | cd) + blocks[1] + 1518500249;
+      a = (a << 3) | (a >>> 29);
+      ab = a & b;
+      d += (ab | (a & c) | bc) + blocks[5] + 1518500249;
+      d = (d << 5) | (d >>> 27);
+      da = d & a;
+      c += (da | (d & b) | ab) + blocks[9] + 1518500249;
+      c = (c << 9) | (c >>> 23);
+      cd = c & d;
+      b += (cd | (c & a) | da) + blocks[13] + 1518500249;
+      b = (b << 13) | (b >>> 19);
+      bc = b & c;
+      a += (bc | (b & d) | cd) + blocks[2] + 1518500249;
+      a = (a << 3) | (a >>> 29);
+      ab = a & b;
+      d += (ab | (a & c) | bc) + blocks[6] + 1518500249;
+      d = (d << 5) | (d >>> 27);
+      da = d & a;
+      c += (da | (d & b) | ab) + blocks[10] + 1518500249;
+      c = (c << 9) | (c >>> 23);
+      cd = c & d;
+      b += (cd | (c & a) | da) + blocks[14] + 1518500249;
+      b = (b << 13) | (b >>> 19);
+      bc = b & c;
+      a += (bc | (b & d) | cd) + blocks[3] + 1518500249;
+      a = (a << 3) | (a >>> 29);
+      ab = a & b;
+      d += (ab | (a & c) | bc) + blocks[7] + 1518500249;
+      d = (d << 5) | (d >>> 27);
+      da = d & a;
+      c += (da | (d & b) | ab) + blocks[11] + 1518500249;
+      c = (c << 9) | (c >>> 23);
+      b += ((c & d) | (c & a) | da) + blocks[15] + 1518500249;
+      b = (b << 13) | (b >>> 19);
 
-      a = r2(a, b, c, d, blocks[0], 3);
-      d = r2(d, a, b, c, blocks[4], 5);
-      c = r2(c, d, a, b, blocks[8], 9);
-      b = r2(b, c, d, a, blocks[12], 13);
-      a = r2(a, b, c, d, blocks[1], 3);
-      d = r2(d, a, b, c, blocks[5], 5);
-      c = r2(c, d, a, b, blocks[9], 9);
-      b = r2(b, c, d, a, blocks[13], 13);
-      a = r2(a, b, c, d, blocks[2], 3);
-      d = r2(d, a, b, c, blocks[6], 5);
-      c = r2(c, d, a, b, blocks[10], 9);
-      b = r2(b, c, d, a, blocks[14], 13);
-      a = r2(a, b, c, d, blocks[3], 3);
-      d = r2(d, a, b, c, blocks[7], 5);
-      c = r2(c, d, a, b, blocks[11], 9);
-      b = r2(b, c, d, a, blocks[15], 13);
+      bc = b ^ c;
+      a += (bc ^ d) + blocks[0] + 1859775393;
+      a = (a << 3) | (a >>> 29);
+      d += (bc ^ a) + blocks[8] + 1859775393;
+      d = (d << 9) | (d >>> 23);
+      da = d ^ a;
+      c += (da ^ b) + blocks[4] + 1859775393;
+      c = (c << 11) | (c >>> 21);
+      b += (da ^ c) + blocks[12] + 1859775393;
+      b = (b << 15) | (b >>> 17);
+      bc = b ^ c;
+      a += (bc ^ d) + blocks[2] + 1859775393;
+      a = (a << 3) | (a >>> 29);
+      d += (bc ^ a) + blocks[10] + 1859775393;
+      d = (d << 9) | (d >>> 23);
+      da = d ^ a;
+      c += (da ^ b) + blocks[6] + 1859775393;
+      c = (c << 11) | (c >>> 21);
+      b += (da ^ c) + blocks[14] + 1859775393;
+      b = (b << 15) | (b >>> 17);
+      bc = b ^ c;
+      a += (bc ^ d) + blocks[1] + 1859775393;
+      a = (a << 3) | (a >>> 29);
+      d += (bc ^ a) + blocks[9] + 1859775393;
+      d = (d << 9) | (d >>> 23);
+      da = d ^ a;
+      c += (da ^ b) + blocks[5] + 1859775393;
+      c = (c << 11) | (c >>> 21);
+      b += (da ^ c) + blocks[13] + 1859775393;
+      b = (b << 15) | (b >>> 17);
+      bc = b ^ c;
+      a += (bc ^ d) + blocks[3] + 1859775393;
+      a = (a << 3) | (a >>> 29);
+      d += (bc ^ a) + blocks[11] + 1859775393;
+      d = (d << 9) | (d >>> 23);
+      da = d ^ a;
+      c += (da ^ b) + blocks[7] + 1859775393;
+      c = (c << 11) | (c >>> 21);
+      b += (da ^ c) + blocks[15] + 1859775393;
+      b = (b << 15) | (b >>> 17);
 
-      a = r3(a, b, c, d, blocks[0], 3);
-      d = r3(d, a, b, c, blocks[8], 9);
-      c = r3(c, d, a, b, blocks[4], 11);
-      b = r3(b, c, d, a, blocks[12], 15);
-      a = r3(a, b, c, d, blocks[2], 3);
-      d = r3(d, a, b, c, blocks[10], 9);
-      c = r3(c, d, a, b, blocks[6], 11);
-      b = r3(b, c, d, a, blocks[14], 15);
-      a = r3(a, b, c, d, blocks[1], 3);
-      d = r3(d, a, b, c, blocks[9], 9);
-      c = r3(c, d, a, b, blocks[5], 11);
-      b = r3(b, c, d, a, blocks[13], 15);
-      a = r3(a, b, c, d, blocks[3], 3);
-      d = r3(d, a, b, c, blocks[11], 9);
-      c = r3(c, d, a, b, blocks[7], 11);
-      b = r3(b, c, d, a, blocks[15], 15);
-
-      h0 = h0 + a << 0;
-      h1 = h1 + b << 0;
-      h2 = h2 + c << 0;
-      h3 = h3 + d << 0;
+      if(first) {
+        h0 = a + 1732584193 << 0;
+        h1 = b - 271733879 << 0;
+        h2 = c - 1732584194 << 0;
+        h3 = d + 271733878 << 0;
+        first = false;
+      } else {
+        h0 = h0 + a << 0;
+        h1 = h1 + b << 0;
+        h2 = h2 + c << 0;
+        h3 = h3 + d << 0;
+      }
     } while(!end);
 
     if(FIREFOX) {
@@ -196,34 +281,6 @@
          HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
     }
   };
-
-  function rotate(num, cnt) {
-    return (num << cnt) | (num >>> (32 - cnt));
-  }
-
-  function f(x, y, z) {
-    return (x & y) | (~x & z);
-  }
-
-  function g(x, y, z) {
-    return (x & y) | (x & z) | (y & z);
-  }
-
-  function h(x, y, z) {
-    return x ^ y ^ z;
-  }
-
-  function r1(a, b, c, d, x, s) {
-    return rotate((a + f(b, c, d) + x), s);
-  }
-
-  function r2(a, b, c, d, x, s) {
-    return rotate((a + g(b, c, d) + x + 0x5A827999), s);
-  }
-
-  function r3(a, b, c, d, x, s) {
-    return rotate((a + h(b, c, d) + x + 0x6ED9EBA1), s);
-  }
 
   if(!root.JS_MD4_TEST && NODE_JS) {
     module.exports = md4;
