@@ -4,6 +4,9 @@
 [![NPM](https://nodei.co/npm/js-md4.png?stars&downloads)](https://nodei.co/npm/js-md4/)  
 A simple MD4 hash function for JavaScript supports UTF-8 encoding.
 
+## Demo
+[MD4 Online](http://emn178.github.io/online-tools/md4.html)  
+
 ## Download
 [Compress](https://raw.github.com/emn178/js-md4/master/build/md4.min.js)  
 [Uncompress](https://raw.github.com/emn178/js-md4/master/src/md4.js)
