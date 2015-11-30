@@ -43,5 +43,29 @@
         expect(md4('012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678')).to.be('47eebbaaa1fca842a7bff2d3b7c9f0c6');
       });
     });
+
+    describe('array input', function() {
+      var HELLO = [72, 69, 76, 76, 79];
+      describe('standard array', function() {
+        it('should be successful', function() {
+          expect(md4(HELLO)).to.be('4c832b90373e2d3f4a8ce06172989e2b');
+        });
+      });
+      if (!global.JS_MD4_TEST) {
+        describe('typed array', function() {
+          var copy = function(source, target) {
+            for (var i = 0; i < source.length; i++) {
+              target[i] = source[i];
+            }
+            return target;
+          }
+          it('should be successful', function() {
+            expect(md4(copy(HELLO, new Uint8Array(HELLO.length)))).to.be('4c832b90373e2d3f4a8ce06172989e2b');
+            expect(md4(copy(HELLO, new Int8Array(HELLO.length)))).to.be('4c832b90373e2d3f4a8ce06172989e2b');
+          });
+        });
+      }
+    });
   });
+
 })(md4);
