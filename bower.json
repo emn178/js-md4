@@ -1,7 +1,7 @@
 {
   "name": "js-md4",
-  "version": "0.1.1",
-  "main": ["build/md4.min.js"],
+  "version": "0.2.0",
+  "main": ["src/md4.js"],
   "ignore": [
     "samples",
     "tests"

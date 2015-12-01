@@ -53,6 +53,18 @@ Output
 
     223088bf7bd45a16436b15360c5fc5a0
 
+It also supports byte `Array`, `Uint8Array`, `ArrayBuffer` input:
+
+Code
+```JavaScript
+md4([]);
+md4(new Uint8Array([]));
+```
+Output
+
+    31d6cfe0d16ae931b73c59d7e0c089c0
+    31d6cfe0d16ae931b73c59d7e0c089c0
+
 ## Extensions
 ### jQuery
 If you prefer jQuery style, you can add following code to add a jQuery extension.
