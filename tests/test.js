@@ -1,4 +1,14 @@
 (function(md4) {
+  Array.prototype.toHexString = ArrayBuffer.prototype.toHexString = function () {
+    var array = new Uint8Array(this);
+    var hex = '';
+    for (var i = 0;i < array.length;++i) {
+      var c = array[i].toString('16');
+      hex += c.length == 1 ? '0' + c : c;
+    }
+    return hex;
+  };
+
   var testCases = {
     'ascii': {
       '31d6cfe0d16ae931b73c59d7e0c089c0': '',
@@ -48,20 +58,120 @@
     }
   };
 
-  describe('#md4', function() {
-    for(var testCaseName in testCases) {
-      (function(testCaseName) {
-        var testCase = testCases[testCaseName];
-        context('when ' + testCaseName, function() {
-          for(var hash in testCase) {
-            (function(message, hash) {
-              it('should be equal', function() {
-                expect(md4(message)).to.be(hash);
-              });
-            })(testCase[hash], hash);
-          }
-        });
-      })(testCaseName);
+  var methods = [
+    {
+      name: 'md4',
+      call: md4,
+    },
+    {
+      name: 'md4.hex',
+      call: md4.hex
+    },
+    {
+      name: 'md4.array',
+      call: function (message) {
+        return md4.array(message).toHexString();
+      }
+    },
+    {
+      name: 'md4.digest',
+      call: function (message) {
+        return md4.digest(message).toHexString();
+      }
+    },
+    {
+      name: 'md4.buffer',
+      call: function (message) {
+        return md4.buffer(message).toHexString();
+      }
     }
+  ];
+
+  var classMethods = [
+    {
+      name: 'create',
+      call: function (message) {
+        return md4.create().update(message).toString();
+      }
+    },
+    {
+      name: 'update',
+      call: function (message) {
+        return md4.update(message).toString();
+      }
+    },
+    {
+      name: 'hex',
+      call: function (message) {
+        return md4.update(message).hex();
+      }
+    },
+    {
+      name: 'array',
+      call: function (message) {
+        return md4.update(message).array().toHexString();
+      }
+    },
+    {
+      name: 'digest',
+      call: function (message) {
+        return md4.update(message).digest().toHexString();
+      }
+    },
+    {
+      name: 'buffer',
+      call: function (message) {
+        return md4.update(message).buffer().toHexString();
+      }
+    },
+    {
+      name: 'finalize',
+      call: function (message) {
+        var hash = md4.update(message);
+        hash.hex();
+        hash.update(message);
+        return hash.hex();
+      }
+    }
+  ];
+
+  methods.forEach(function (method) {
+    describe('#' + method.name, function() {
+      for(var testCaseName in testCases) {
+        (function(testCaseName) {
+          var testCase = testCases[testCaseName];
+          context('when ' + testCaseName, function() {
+            for(var hash in testCase) {
+              (function(message, hash) {
+                it('should be equal', function() {
+                  expect(method.call(message)).to.be(hash);
+                });
+              })(testCase[hash], hash);
+            }
+          });
+        })(testCaseName);
+      }
+    });
+  });
+
+  describe('Md4', function() {
+    classMethods.forEach(function (method) {
+      describe('#' + method.name, function() {
+        for(var testCaseName in testCases) {
+          (function(testCaseName) {
+            var testCase = testCases[testCaseName];
+            context('when ' + testCaseName, function() {
+              for(var hash in testCase) {
+                (function(message, hash) {
+                  it('should be equal', function() {
+                    expect(method.call(message)).to.be(hash);
+                  });
+                })(testCase[hash], hash);
+              }
+            });
+          })(testCaseName);
+        }
+      });
+    });
   });
 })(md4);
