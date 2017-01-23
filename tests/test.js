@@ -2,7 +2,7 @@
   Array.prototype.toHexString = ArrayBuffer.prototype.toHexString = function () {
     var array = new Uint8Array(this);
     var hex = '';
-    for (var i = 0;i < array.length;++i) {
+    for (var i = 0; i < array.length; ++i) {
       var c = array[i].toString('16');
       hex += c.length == 1 ? '0' + c : c;
     }
@@ -53,7 +53,6 @@
       '47c61a0fa8738ba77308a8a600f88e4b': new ArrayBuffer(1)
     },
     'Object': {
-      '31d6cfe0d16ae931b73c59d7e0c089c0': {},
       '31d6cfe0d16ae931b73c59d7e0c089c0': {what: 'ever'}
     }
   };
@@ -119,9 +118,9 @@
       }
     },
     {
-      name: 'buffer',
+      name: 'arrayBuffer',
       call: function (message) {
-        return md4.update(message).buffer().toHexString();
+        return md4.update(message).arrayBuffer().toHexString();
       }
     },
     {
@@ -135,14 +134,21 @@
     }
   ];
 
+  if (typeof JS_MD4_NO_ARRAY_BUFFER !== 'undefined') {
+    classMethods = classMethods.filter(function (method) {
+      return method.name != 'arrayBuffer';
+    });
+    delete testCases['ArrayBuffer'];
+  }
+
   methods.forEach(function (method) {
     describe('#' + method.name, function() {
-      for(var testCaseName in testCases) {
-        (function(testCaseName) {
+      for (var testCaseName in testCases) {
+        (function (testCaseName) {
           var testCase = testCases[testCaseName];
           context('when ' + testCaseName, function() {
             for(var hash in testCase) {
-              (function(message, hash) {
+              (function (message, hash) {
                 it('should be equal', function() {
                   expect(method.call(message)).to.be(hash);
                 });
@@ -154,15 +160,15 @@
     });
   });
 
-  describe('Md4', function() {
+  describe('Md4', function () {
     classMethods.forEach(function (method) {
       describe('#' + method.name, function() {
-        for(var testCaseName in testCases) {
-          (function(testCaseName) {
+        for (var testCaseName in testCases) {
+          (function (testCaseName) {
             var testCase = testCases[testCaseName];
             context('when ' + testCaseName, function() {
               for(var hash in testCase) {
-                (function(message, hash) {
+                (function (message, hash) {
                   it('should be equal', function() {
                     expect(method.call(message)).to.be(hash);
                   });

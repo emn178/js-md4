@@ -20,6 +20,9 @@ For node.js, you can use this command to install:
 
     npm install js-md4
 
+## Notice
+`buffer` method is deprecated. This maybe confuse with Buffer in node.js. Please use `arrayBuffer` instead.
+
 ## Usage
 You could use like this:
 ```JavaScript
@@ -30,11 +33,11 @@ hash.hex();
 ```
 If you use node.js, you should require the module first:
 ```JavaScript
-md4 = require('js-md4');
+var md4 = require('js-md4');
 ```
 It supports AMD:
 ```JavaScript
-require(['your/path/md4.js'], function(md4) {
+require(['your/path/md4.js'], function (md4) {
 // ...
 });
 ```
@@ -58,7 +61,7 @@ md4(''); // 31d6cfe0d16ae931b73c59d7e0c089c0
 md4.hex(''); // 31d6cfe0d16ae931b73c59d7e0c089c0
 md4.array(''); // [49, 214, 207, 224, 209, 106, 233, 49, 183, 60, 89, 215, 224, 192, 137, 192]
 md4.digest(''); // [49, 214, 207, 224, 209, 106, 233, 49, 183, 60, 89, 215, 224, 192, 137, 192]
-md4.buffer(''); // ArrayBuffer
+md4.arrayBuffer(''); // ArrayBuffer
 ```
 
 ## License
@@ -66,4 +69,4 @@ The project is released under the [MIT license](http://www.opensource.org/licens
 
 ## Contact
 The project's website is located at https://github.com/emn178/js-md4  
-Author: Yi-Cyuan Chen
+Author: Chen, Yi-Cyuan (emn178@gmail.com)

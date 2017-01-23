@@ -1,6 +1,6 @@
 {
   "name": "js-md4",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A simple MD4 hash function for JavaScript supports UTF-8 encoding.",
   "main": "src/md4.js",
   "devDependencies": {
@@ -30,7 +30,7 @@
     "HMAC"
   ],
   "license": "MIT",
-  "author": "emn178 <emn178@gmail.com>",
+  "author": "Chen, Yi-Cyuan <emn178@gmail.com>",
   "homepage": "https://github.com/emn178/js-md4",
   "bugs": {
     "url": "https://github.com/emn178/js-md4/issues"

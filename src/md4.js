@@ -2,22 +2,23 @@
  * [js-md4]{@link https://github.com/emn178/js-md4}
  *
  * @namespace md4
- * @version 0.3.0
+ * @version 0.3.1
  * @author Yi-Cyuan Chen [emn178@gmail.com]
- * @copyright Yi-Cyuan Chen 2015
+ * @copyright Yi-Cyuan Chen 2015-2027
  * @license MIT
  */
-(function (root) {
+/*jslint bitwise: true */
+(function () {
   'use strict';
 
-  var NODE_JS = typeof process == 'object' && process.versions && process.versions.node;
+  var root = typeof window === 'object' ? window : {};
+  var NODE_JS = !root.JS_MD4_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
   if (NODE_JS) {
     root = global;
   }
-  var COMMON_JS = !root.JS_MD4_TEST && typeof module == 'object' && module.exports;
-  var AMD = typeof define == 'function' && define.amd;
-
-  var ARRAY_BUFFER = !root.JS_MD4_TEST && typeof ArrayBuffer != 'undefined';
+  var COMMON_JS = !root.JS_MD4_NO_COMMON_JS && typeof module === 'object' && module.exports;
+  var AMD = typeof define === 'function' && define.amd;
+  var ARRAY_BUFFER = !root.JS_MD4_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
   var SHIFT = [0, 8, 16, 24];
@@ -102,7 +103,7 @@
     method.update = function (message) {
       return method.create().update(message);
     };
-    for (var i = 0;i < OUTPUT_TYPES.length;++i) {
+    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
       var type = OUTPUT_TYPES[i];
       method[type] = createOutputMethod(type);
     }
@@ -151,8 +152,8 @@
     if (this.finalized) {
       return;
     }
-    var notString = typeof(message) != 'string';
-    if(notString && message.constructor == root.ArrayBuffer) {
+    var notString = typeof message !== 'string';
+    if(notString && ARRAY_BUFFER && message instanceof ArrayBuffer) {
       message = new Uint8Array(message);
     }
     var code, index = 0, i, length = message.length || 0, blocks = this.blocks;
@@ -170,17 +171,17 @@
 
       if (notString) {
         if (ARRAY_BUFFER) {
-          for (i = this.start;index < length && i < 64; ++index) {
+          for (i = this.start; index < length && i < 64; ++index) {
             buffer8[i++] = message[index];
           }
         } else {
-          for (i = this.start;index < length && i < 64; ++index) {
+          for (i = this.start; index < length && i < 64; ++index) {
             blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
           }
         }
       } else {
         if (ARRAY_BUFFER) {
-          for (i = this.start;index < length && i < 64; ++index) {
+          for (i = this.start; index < length && i < 64; ++index) {
             code = message.charCodeAt(index);
             if (code < 0x80) {
               buffer8[i++] = code;
@@ -200,7 +201,7 @@
             }
           }
         } else {
-          for (i = this.start;index < length && i < 64; ++index) {
+          for (i = this.start; index < length && i < 64; ++index) {
             code = message.charCodeAt(index);
             if (code < 0x80) {
               blocks[i >> 2] |= code << SHIFT[i++ & 3];
@@ -425,21 +426,21 @@
     var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3;
 
     return HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
-       HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
-       HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
-       HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
-       HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
-       HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
-       HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
-       HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
-       HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
-       HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
-       HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
-       HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
-       HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
-       HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
-       HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
-       HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
+      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
+      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
+      HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
+      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
+      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
+      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
+      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
+      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
+      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
+      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
+      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
+      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
+      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
+      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
+      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
   };
 
   /**
@@ -489,16 +490,16 @@
   Md4.prototype.array = Md4.prototype.digest;
 
   /**
-   * @method buffer
+   * @method arrayBuffer
    * @memberof Md4
    * @instance
    * @description Output hash as ArrayBuffer
    * @returns {ArrayBuffer} ArrayBuffer
-   * @see {@link md4.buffer}
+   * @see {@link md4.arrayBuffer}
    * @example
-   * hash.buffer();
+   * hash.arrayBuffer();
    */
-  Md4.prototype.buffer = function() {
+  Md4.prototype.arrayBuffer = function() {
     this.finalize();
 
     var buffer = new ArrayBuffer(16);
@@ -509,6 +510,19 @@
     blocks[3] = this.h3;
     return buffer;
   };
+
+  /**
+   * @method buffer
+   * @deprecated This maybe confuse with Buffer in node.js. Please use arrayBuffer instead.
+   * @memberof Md4
+   * @instance
+   * @description Output hash as ArrayBuffer
+   * @returns {ArrayBuffer} ArrayBuffer
+   * @see {@link md4.buffer}
+   * @example
+   * hash.buffer();
+   */
+  Md4.prototype.buffer = Md4.prototype.arrayBuffer;
 
   var exports = createMethod();
 
@@ -539,4 +553,4 @@
       });
     }
   }
-}(this));
+})();
