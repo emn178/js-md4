@@ -2,7 +2,7 @@
  * [js-md4]{@link https://github.com/emn178/js-md4}
  *
  * @namespace md4
- * @version 0.3.1
+ * @version 0.3.2
  * @author Yi-Cyuan Chen [emn178@gmail.com]
  * @copyright Yi-Cyuan Chen 2015-2027
  * @license MIT
@@ -22,7 +22,7 @@
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
   var SHIFT = [0, 8, 16, 24];
-  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'buffer'];
+  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'buffer', 'arrayBuffer'];
 
   var blocks = [], buffer8;
   if (ARRAY_BUFFER) {
@@ -97,6 +97,9 @@
    */
   var createMethod = function () {
     var method = createOutputMethod('hex');
+    if (NODE_JS) {
+      method = nodeWrap(method);
+    }
     method.create = function () {
       return new Md4();
     };
@@ -110,6 +113,21 @@
     return method;
   };
 
+  var nodeWrap = function (method) {
+    var crypto = require('crypto');
+    var Buffer = require('buffer').Buffer;
+    var nodeMethod = function (message) {
+      if (typeof message === 'string') {
+        return crypto.createHash('md4').update(message, 'utf8').digest('hex');
+      } else if (ARRAY_BUFFER && message instanceof ArrayBuffer) {
+        message = new Uint8Array(message);
+      } else if (message.length === undefined) {
+        return method(message);
+      }
+      return crypto.createHash('md4').update(new Buffer(message)).digest('hex');
+    };
+    return nodeMethod;
+  };
 
   /**
    * Md4 class
@@ -153,7 +171,7 @@
       return;
     }
     var notString = typeof message !== 'string';
-    if(notString && ARRAY_BUFFER && message instanceof ArrayBuffer) {
+    if (notString && ARRAY_BUFFER && message instanceof ArrayBuffer) {
       message = new Uint8Array(message);
     }
     var code, index = 0, i, length = message.length || 0, blocks = this.blocks;

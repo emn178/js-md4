@@ -1,8 +1,13 @@
 # Change Log
 
+## v0.3.2 / 2017-01-24
+### Added
+- missing arrayBuffer method.
+
 ## v0.3.1 / 2017-01-23
 ### Fixed
 - ArrayBuffer dosen't work in Webpack.
+
 ### Deprecated
 - `buffer` maybe confuse with Buffer in node.js. Please use `arrayBuffer` instead.
 

@@ -4,7 +4,7 @@
     var hex = '';
     for (var i = 0; i < array.length; ++i) {
       var c = array[i].toString('16');
-      hex += c.length == 1 ? '0' + c : c;
+      hex += c.length === 1 ? '0' + c : c;
     }
     return hex;
   };
@@ -141,26 +141,26 @@
     delete testCases['ArrayBuffer'];
   }
 
-  methods.forEach(function (method) {
-    describe('#' + method.name, function() {
-      for (var testCaseName in testCases) {
-        (function (testCaseName) {
-          var testCase = testCases[testCaseName];
-          context('when ' + testCaseName, function() {
-            for(var hash in testCase) {
-              (function (message, hash) {
-                it('should be equal', function() {
-                  expect(method.call(message)).to.be(hash);
-                });
-              })(testCase[hash], hash);
-            }
-          });
-        })(testCaseName);
-      }
-    });
-  });
-
   describe('Md4', function () {
+    methods.forEach(function (method) {
+      describe('#' + method.name, function() {
+        for (var testCaseName in testCases) {
+          (function (testCaseName) {
+            var testCase = testCases[testCaseName];
+            context('when ' + testCaseName, function() {
+              for(var hash in testCase) {
+                (function (message, hash) {
+                  it('should be equal', function() {
+                    expect(method.call(message)).to.be(hash);
+                  });
+                })(testCase[hash], hash);
+              }
+            });
+          })(testCaseName);
+        }
+      });
+    });
+
     classMethods.forEach(function (method) {
       describe('#' + method.name, function() {
         for (var testCaseName in testCases) {

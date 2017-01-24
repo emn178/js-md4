@@ -1,6 +1,6 @@
 {
   "name": "js-md4",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": ["src/md4.js"],
   "ignore": [
     "samples",
