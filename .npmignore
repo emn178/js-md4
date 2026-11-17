@@ -1,0 +1,10 @@
+/node_modules/
+/coverage/
+/.nyc_output/
+/tests/
+/.github/
+/doc/
+.npmignore
+bower.json
+jsdoc.json
+rollup.config.mjs

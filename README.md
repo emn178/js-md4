@@ -1,11 +1,13 @@
 # js-md4
-[![Build Status](https://travis-ci.org/emn178/js-md4.svg?branch=master)](https://travis-ci.org/emn178/js-md4)
-[![Coverage Status](https://coveralls.io/repos/emn178/js-md4/badge.svg?branch=master)](https://coveralls.io/r/emn178/js-md4?branch=master)  
-[![NPM](https://nodei.co/npm/js-md4.png?stars&downloads)](https://nodei.co/npm/js-md4/)  
+[![CI](https://github.com/emn178/js-md4/actions/workflows/ci.yml/badge.svg)](https://github.com/emn178/js-md4/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/emn178/js-md4/badge.svg?branch=master)](https://coveralls.io/r/emn178/js-md4?branch=master)
+[![NPM](https://img.shields.io/npm/v/js-md4)](https://www.npmjs.com/package/js-md4)
+[![CDNJS](https://img.shields.io/jsdelivr/npm/hm/js-md4)](https://www.jsdelivr.com/package/npm/js-md4)
+
 A simple MD4 hash function for JavaScript supports UTF-8 encoding.
 
 ## Demo
-[MD4 Online](http://emn178.github.io/online-tools/md4.html)  
+[MD4 Online](https://emn178.github.io/online-tools/md4.html)  
 
 ## Download
 [Compress](https://raw.github.com/emn178/js-md4/master/build/md4.min.js)  
@@ -22,6 +24,8 @@ For node.js, you can use this command to install:
 
 ## Notice
 `buffer` method is deprecated. This maybe confuse with Buffer in node.js. Please use `arrayBuffer` instead.
+
+MD4 is not available in Node.js `crypto` since Node.js 17 (OpenSSL 3), so js-md4 always uses its JavaScript implementation.
 
 ## Usage
 You could use like this:
@@ -40,6 +44,22 @@ If you use node.js, you should require the module first:
 ```JavaScript
 var md4 = require('js-md4');
 ```
+If you use node.js ESM or a bundler, you can import like this:
+```JavaScript
+import { md4 } from 'js-md4';
+// or
+import md4 from 'js-md4';
+```
+In browsers, you can import the ESM build directly:
+```HTML
+<script type="module">
+  import { md4 } from 'https://cdn.jsdelivr.net/npm/js-md4/build/md4.min.mjs';
+</script>
+```
+If you use TypeScript, you can import like this:
+```TypeScript
+import { md4 } from 'js-md4';
+```
 It supports AMD:
 ```JavaScript
 require(['your/path/md4.js'], function (md4) {
@@ -56,6 +76,9 @@ md4('The quick brown fox jumps over the lazy dog.'); // 2812c6c7136898c51f6f6739
 
 // It also supports UTF-8 encoding
 md4('中文'); // 223088bf7bd45a16436b15360c5fc5a0
+
+// Unpaired surrogates are encoded as U+FFFD, the same as TextEncoder
+md4('\ud800'); // 35852b4988e2e8b0e18a4ece221e2ce2
 
 // It also supports byte `Array`, `Uint8Array`, `ArrayBuffer`
 md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0

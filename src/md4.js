@@ -2,19 +2,28 @@
  * [js-md4]{@link https://github.com/emn178/js-md4}
  *
  * @namespace md4
- * @version 0.3.2
+ * @version 0.4.0
  * @author Yi-Cyuan Chen [emn178@gmail.com]
- * @copyright Yi-Cyuan Chen 2015-2027
+ * @copyright Yi-Cyuan Chen 2015-2026
  * @license MIT
  */
 /*jslint bitwise: true */
 (function () {
   'use strict';
 
-  var root = typeof window === 'object' ? window : {};
-  var NODE_JS = !root.JS_MD4_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
+  var INPUT_ERROR = 'input is invalid type';
+  var FINALIZE_ERROR = 'finalize already called';
+  var WINDOW = typeof window === 'object';
+  var root = WINDOW ? window : {};
+  if (root.JS_MD4_NO_WINDOW) {
+    WINDOW = false;
+  }
+  var WEB_WORKER = !WINDOW && typeof self === 'object';
+  var NODE_JS = !root.JS_MD4_NO_NODE_JS && !WINDOW && typeof process === 'object' && process.versions && process.versions.node && process.type != 'renderer';
   if (NODE_JS) {
     root = global;
+  } else if (WEB_WORKER) {
+    root = self;
   }
   var COMMON_JS = !root.JS_MD4_NO_COMMON_JS && typeof module === 'object' && module.exports;
   var AMD = typeof define === 'function' && define.amd;
@@ -30,6 +39,38 @@
     buffer8 = new Uint8Array(buffer);
     blocks = new Uint32Array(buffer);
   }
+
+  var isArray = Array.isArray;
+  if (root.JS_MD4_NO_NODE_JS || !isArray) {
+    isArray = function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    };
+  }
+
+  var isView = ARRAY_BUFFER ? ArrayBuffer.isView : null;
+  if (ARRAY_BUFFER && (root.JS_MD4_NO_ARRAY_BUFFER_IS_VIEW || !isView)) {
+    isView = function (obj) {
+      return typeof obj === 'object' && obj.buffer && obj.buffer.constructor === ArrayBuffer;
+    };
+  }
+
+  // [message: string, isString: bool]
+  var formatMessage = function (message) {
+    var type = typeof message;
+    if (type === 'string') {
+      return [message, true];
+    }
+    if (type !== 'object' || message === null) {
+      throw new Error(INPUT_ERROR);
+    }
+    if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {
+      return [new Uint8Array(message), false];
+    }
+    if (!isArray(message) && !(ARRAY_BUFFER && isView(message))) {
+      throw new Error(INPUT_ERROR);
+    }
+    return [message, false];
+  };
 
   /**
    * @method hex
@@ -97,9 +138,6 @@
    */
   var createMethod = function () {
     var method = createOutputMethod('hex');
-    if (NODE_JS) {
-      method = nodeWrap(method);
-    }
     method.create = function () {
       return new Md4();
     };
@@ -111,22 +149,6 @@
       method[type] = createOutputMethod(type);
     }
     return method;
-  };
-
-  var nodeWrap = function (method) {
-    var crypto = require('crypto');
-    var Buffer = require('buffer').Buffer;
-    var nodeMethod = function (message) {
-      if (typeof message === 'string') {
-        return crypto.createHash('md4').update(message, 'utf8').digest('hex');
-      } else if (ARRAY_BUFFER && message instanceof ArrayBuffer) {
-        message = new Uint8Array(message);
-      } else if (message.length === undefined) {
-        return method(message);
-      }
-      return crypto.createHash('md4').update(new Buffer(message)).digest('hex');
-    };
-    return nodeMethod;
   };
 
   /**
@@ -152,7 +174,7 @@
         this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       }
     }
-    this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = 0;
+    this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = this.hBytes = 0;
     this.finalized = this.hashed = false;
     this.first = true;
   }
@@ -168,13 +190,12 @@
    */
   Md4.prototype.update = function (message) {
     if (this.finalized) {
-      return;
+      throw new Error(FINALIZE_ERROR);
     }
-    var notString = typeof message !== 'string';
-    if (notString && ARRAY_BUFFER && message instanceof ArrayBuffer) {
-      message = new Uint8Array(message);
-    }
-    var code, index = 0, i, length = message.length || 0, blocks = this.blocks;
+    var result = formatMessage(message);
+    message = result[0];
+    var notString = !result[1];
+    var code, code2, index = 0, i, length = message.length, blocks = this.blocks;
     var buffer8 = this.buffer8;
 
     while (index < length) {
@@ -210,12 +231,18 @@
               buffer8[i++] = 0xe0 | (code >> 12);
               buffer8[i++] = 0x80 | ((code >> 6) & 0x3f);
               buffer8[i++] = 0x80 | (code & 0x3f);
-            } else {
-              code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
+            } else if (code < 0xdc00 && (code2 = message.charCodeAt(index + 1)) >= 0xdc00 && code2 < 0xe000) {
+              ++index;
+              code = 0x10000 + (((code & 0x3ff) << 10) | (code2 & 0x3ff));
               buffer8[i++] = 0xf0 | (code >> 18);
               buffer8[i++] = 0x80 | ((code >> 12) & 0x3f);
               buffer8[i++] = 0x80 | ((code >> 6) & 0x3f);
               buffer8[i++] = 0x80 | (code & 0x3f);
+            } else {
+              // unpaired surrogate: U+FFFD
+              buffer8[i++] = 0xef;
+              buffer8[i++] = 0xbf;
+              buffer8[i++] = 0xbd;
             }
           }
         } else {
@@ -230,12 +257,18 @@
               blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
               blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
               blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            } else {
-              code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
+            } else if (code < 0xdc00 && (code2 = message.charCodeAt(index + 1)) >= 0xdc00 && code2 < 0xe000) {
+              ++index;
+              code = 0x10000 + (((code & 0x3ff) << 10) | (code2 & 0x3ff));
               blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
               blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
               blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
               blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+            } else {
+              // unpaired surrogate: U+FFFD
+              blocks[i >> 2] |= 0xef << SHIFT[i++ & 3];
+              blocks[i >> 2] |= 0xbf << SHIFT[i++ & 3];
+              blocks[i >> 2] |= 0xbd << SHIFT[i++ & 3];
             }
           }
         }
@@ -249,6 +282,10 @@
       } else {
         this.start = i;
       }
+    }
+    if (this.bytes > 4294967295) {
+      this.hBytes += this.bytes / 4294967296 << 0;
+      this.bytes = this.bytes % 4294967296;
     }
     return this;
   };
@@ -271,6 +308,7 @@
       blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
     }
     blocks[14] = this.bytes << 3;
+    blocks[15] = this.hBytes << 3 | this.bytes >>> 29;
     this.hash();
   };
 

@@ -1,22 +1,41 @@
 {
   "name": "js-md4",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "A simple MD4 hash function for JavaScript supports UTF-8 encoding.",
   "main": "src/md4.js",
+  "module": "build/md4.mjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./build/md4.mjs",
+      "require": "./src/md4.js",
+      "default": "./src/md4.js"
+    },
+    "./src/md4.js": "./src/md4.js",
+    "./build/md4.min.js": "./build/md4.min.js",
+    "./build/md4.mjs": "./build/md4.mjs",
+    "./build/md4.min.mjs": "./build/md4.min.mjs",
+    "./package.json": "./package.json"
+  },
+  "types": "./index.d.ts",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-terser": "^1.0.2",
     "expect.js": "~0.3.1",
-    "jscoverage": "~0.5.9",
-    "jsdoc": "^3.4.0",
-    "mocha": "~2.3.4",
-    "uglifyjs": "~2.4.10"
+    "jsdoc": "^4.0.5",
+    "mocha": "^12.0.3",
+    "nyc": "^18.0.0",
+    "rollup": "^4.65.0",
+    "uglify-js": "^3.19.3"
   },
   "scripts": {
-    "test": "mocha tests/node-test.js -r jscoverage",
-    "report": "mocha tests/node-test.js -r jscoverage --covout=html",
-    "coveralls": "mocha tests/node-test.js -R mocha-lcov-reporter -r jscoverage | coveralls",
-    "doc": "rm -rf doc;jsdoc src README.md -d doc",
-    "compress": "uglifyjs src/md4.js --compress --mangle --comments --output build/md4.min.js",
-    "build": "npm run-script compress;npm run-script doc"
+    "test": "npm run build && npm run test:coverage",
+    "test:runtime": "mocha tests/node-test.js && mocha tests/esm-test.mjs",
+    "test:coverage": "nyc --reporter=text --reporter=html --reporter=lcov npm run test:runtime",
+    "report": "nyc --reporter=html --reporter=text npm run test:runtime",
+    "doc": "rm -rf doc && jsdoc -c jsdoc.json src/md4.js README.md -d doc",
+    "build": "rollup -c && uglifyjs src/md4.js -c -m --comments -o build/md4.min.js && npm run doc",
+    "prepack": "rollup -c && uglifyjs src/md4.js -c -m --comments -o build/md4.min.js"
   },
   "repository": {
     "type": "git",
@@ -26,13 +45,21 @@
     "md4",
     "hash",
     "encryption",
-    "cryptography",
-    "HMAC"
+    "cryptography"
   ],
   "license": "MIT",
   "author": "Chen, Yi-Cyuan <emn178@gmail.com>",
   "homepage": "https://github.com/emn178/js-md4",
   "bugs": {
     "url": "https://github.com/emn178/js-md4/issues"
+  },
+  "nyc": {
+    "exclude": [
+      "tests"
+    ]
+  },
+  "overrides": {
+    "glob": "^14.0.2",
+    "minimatch": "^11.0.1"
   }
 }

@@ -27,6 +27,12 @@
       '968bd34f00469adbddbe6d803b28cff9': '訊息摘要演算法第五版（英語：Message-Digest Algorithm 5，縮寫為MD5），是當前電腦領域用於確保資訊傳輸完整一致而廣泛使用的雜湊演算法之一',
       '2e03bd374f7be036d4fa838cb9662597': '訊息摘要演算法第五版（英語：Message-Digest Algorithm 5，縮寫為MD5），是當前電腦領域用於確保資訊傳輸完整一致而廣泛使用的雜湊演算法之一（又譯雜湊演算法、摘要演算法等），主流程式語言普遍已有MD5的實作。'
     },
+    'UTF8 unpaired surrogates': {
+      '35852b4988e2e8b0e18a4ece221e2ce2': '\ud800',
+      '6035cbbee9fbe437c2b68d153cc0a48e': 'a\ud83db',
+      '1ba306db79b2ab3296862f2ff8e9270e': '\ud83d\ud83d\ude00\udfff',
+      '5dc836fe55c506df36917c0e7dbb1972': Array(63).join('a') + '\ud800b'
+    },
     'special length': {
       '91df808c37b8c5544391a3aa2196114e': '0123456780123456780123456780123456780123456780123456780',
       '3825a0afe234b8029ccad9a31ec5f8ee': '01234567801234567801234567801234567801234567801234567801',
@@ -51,11 +57,10 @@
     },
     'ArrayBuffer': {
       '47c61a0fa8738ba77308a8a600f88e4b': new ArrayBuffer(1)
-    },
-    'Object': {
-      '31d6cfe0d16ae931b73c59d7e0c089c0': {what: 'ever'}
     }
   };
+
+  var errorTestCases = [null, undefined, { length: 0 }, 0, 1, false, true, NaN, Infinity, function () {}];
 
   var methods = [
     {
@@ -128,7 +133,6 @@
       call: function (message) {
         var hash = md4.update(message);
         hash.hex();
-        hash.update(message);
         return hash.hex();
       }
     }
@@ -139,6 +143,8 @@
       return method.name != 'arrayBuffer';
     });
     delete testCases['ArrayBuffer'];
+    delete testCases['Uint8Array'];
+    delete testCases['Int8Array'];
   }
 
   describe('Md4', function () {
@@ -177,6 +183,45 @@
             });
           })(testCaseName);
         }
+      });
+    });
+  });
+
+  describe('#md4', function () {
+    errorTestCases.forEach(function (testCase) {
+      context('when ' + testCase, function () {
+        it('should throw error', function () {
+          expect(function () {
+            md4(testCase);
+          }).to.throwError(/input is invalid type/);
+        });
+      });
+    });
+
+    context('when update after finalize', function () {
+      it('should throw error', function () {
+        expect(function () {
+          var hash = md4.update('any');
+          hash.hex();
+          hash.update('any');
+        }).to.throwError(/finalize already called/);
+      });
+    });
+
+    context('when a surrogate pair is split across updates', function () {
+      it('should encode each unpaired half as U+FFFD', function () {
+        expect(md4.update('a\ud83d').update('\ude00b').hex()).to.be('9f16783dd509cdb526a0cfb519b689e2');
+        expect(md4.update('a\ud83d').update('b').hex()).to.be('6035cbbee9fbe437c2b68d153cc0a48e');
+      });
+    });
+
+    context('when large size', function () {
+      it('should be equal', function () {
+        var hash = md4.update('any');
+        hash.bytes = 4294967296;
+        hash.update('any');
+        expect(hash.bytes).to.be(3);
+        expect(hash.hBytes).to.be(1);
       });
     });
   });
