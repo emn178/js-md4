@@ -109,7 +109,7 @@ md4('中文'); // 223088bf7bd45a16436b15360c5fc5a0
 // Unpaired surrogates are encoded as U+FFFD, the same as TextEncoder
 md4('\ud800'); // 35852b4988e2e8b0e18a4ece221e2ce2
 
-// It also supports byte `Array`, `Uint8Array`, `ArrayBuffer`
+// It also supports byte `Array`, `Uint8Array`, `ArrayBuffer` and other `ArrayBuffer` views (their underlying bytes are hashed)
 md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0
 md4(new Uint8Array([])); // 31d6cfe0d16ae931b73c59d7e0c089c0
 

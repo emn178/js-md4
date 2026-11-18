@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.5.0 / 2026-11-18
+### Fixed
+- Incorrect hash for `DataView` input.
+
+### Changed
+- Multi-byte typed arrays such as `Uint16Array`, `Uint32Array` and `Float32Array` are now hashed by their underlying bytes, the same as Node.js `crypto` and Web Crypto. Previously each element was treated as one byte.
+
 ## v0.4.0 / 2026-11-17
 ### Added
 - ESM builds and package `exports`.

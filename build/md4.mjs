@@ -10,7 +10,7 @@ var md4$1 = {exports: {}};
  * [js-md4]{@link https://github.com/emn178/js-md4}
  *
  * @namespace md4
- * @version 0.4.0
+ * @version 0.5.0
  * @author Yi-Cyuan Chen [emn178@gmail.com]
  * @copyright Yi-Cyuan Chen 2015-2026
  * @license MIT
@@ -74,10 +74,14 @@ var md4$1 = {exports: {}};
 	    if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {
 	      return [new Uint8Array(message), false];
 	    }
-	    if (!isArray(message) && !(ARRAY_BUFFER && isView(message))) {
+	    if (isArray(message)) {
+	      return [message, false];
+	    }
+	    if (!ARRAY_BUFFER || !isView(message)) {
 	      throw new Error(INPUT_ERROR);
 	    }
-	    return [message, false];
+	    // read the underlying bytes of any view (DataView, Uint16Array, ...)
+	    return [new Uint8Array(message.buffer, message.byteOffset, message.byteLength), false];
 	  };
 
 	  /**

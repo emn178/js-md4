@@ -55,6 +55,11 @@
       '1bee69a46ba811185c194762abaeae90': new Int8Array([84, 104, 101, 32, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 32, 106, 117, 109, 112, 115, 32, 111, 118, 101, 114, 32, 116, 104, 101, 32, 108, 97, 122, 121, 32, 100, 111, 103]),
       '4c832b90373e2d3f4a8ce06172989e2b': new Int8Array([72, 69, 76, 76, 79])
     },
+    'ArrayBuffer view': {
+      '08f78f39ed6eb80feb0c231cdb30dcb8': new Int8Array([-1, -128, 65, 0, -2]),
+      '9e75f79bc73a0bf3a516afcd46493c08': new Uint16Array(new Uint8Array([2, 1]).buffer),
+      '4c832b90373e2d3f4a8ce06172989e2b': new DataView(new Uint8Array([9, 72, 69, 76, 76, 79, 9]).buffer, 1, 5)
+    },
     'ArrayBuffer': {
       '47c61a0fa8738ba77308a8a600f88e4b': new ArrayBuffer(1)
     }
@@ -145,6 +150,7 @@
     delete testCases['ArrayBuffer'];
     delete testCases['Uint8Array'];
     delete testCases['Int8Array'];
+    delete testCases['ArrayBuffer view'];
   }
 
   describe('Md4', function () {
